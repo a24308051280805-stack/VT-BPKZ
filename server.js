@@ -17,9 +17,9 @@ app.use(express.json()); // Permite recibir datos JSON en el cuerpo de las petic
 app.use(express.static(__dirname)); // Sirve el archivo index.html y assets estáticos
 
 // ==========================================
-// CONEXIÓN A MONGO DB COMPASS
+// CONEXIÓN A MONGO DB COMPASS / ATLAS
 // ==========================================
-// Se conecta a la base de datos 'bp_veterinaria'
+// Se conecta a la base de datos 'bp_veterinaria' en la nube
 mongoose.connect('mongodb+srv://BPKZ:Kevin600y@veterinaria.4bcssc0.mongodb.net/veterinaria?appName=VETERINARIA')
   .then(() => {
     console.log('🚀 Conexión exitosa a MongoDB en Linea');
@@ -62,8 +62,13 @@ const Servicio = mongoose.model('Servicio', new mongoose.Schema({
 }));
 
 // ==========================================
-// RUTAS DE LA API (CRUD COMPLETO)
+// RUTAS DE LA API
 // ==========================================
+
+// Ruta raíz para comprobar que el servidor está vivo en Render
+app.get('/', (req, res) => {
+    res.json({ message: "Servidor de la veterinaria corriendo perfectamente" });
+});
 
 /**
  * Función genérica para crear rutas CRUD rápidamente
@@ -71,13 +76,13 @@ const Servicio = mongoose.model('Servicio', new mongoose.Schema({
  * @param {Mongoose.Model} Modelo - Modelo de Mongoose a usar
  */
 function generarRutasCRUD(ruta, Modelo) {
-    // LEER TODO
+    // LEER TODO (GET)
     app.get(`/api/${ruta}`, async (req, res) => {
         try { res.json(await Modelo.find()); } 
         catch (e) { res.status(500).send(e); }
     });
 
-    // CREAR UNO
+    // CREAR UNO (POST)
     app.post(`/api/${ruta}`, async (req, res) => {
         try {
             const nuevo = new Modelo(req.body);
@@ -86,7 +91,7 @@ function generarRutasCRUD(ruta, Modelo) {
         } catch (e) { res.status(400).send(e); }
     });
 
-    // ACTUALIZAR UNO
+    // ACTUALIZAR UNO (PUT)
     app.put(`/api/${ruta}/:id`, async (req, res) => {
         try {
             const actualizado = await Modelo.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -94,7 +99,7 @@ function generarRutasCRUD(ruta, Modelo) {
         } catch (e) { res.status(400).send(e); }
     });
 
-    // ELIMINAR UNO
+    // ELIMINAR UNO (DELETE)
     app.delete(`/api/${ruta}/:id`, async (req, res) => {
         try {
             await Modelo.findByIdAndDelete(req.params.id);
@@ -140,7 +145,9 @@ async function seedDatabase() {
     }
 }
 
-// Iniciar servidor
+// ==========================================
+// INICIO DEL SERVIDOR
+// ==========================================
 app.listen(PORT, () => {
     console.log(`🌐 Servidor corriendo en http://localhost:${PORT}`);
 });
